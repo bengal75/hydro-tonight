@@ -1,51 +1,69 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import isPast from "date-fns/is_past";
+import isToday from "date-fns/is_today";
+import format from "date-fns/format";
+import "./App.css";
 
-class LambdaDemo extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { loading: false, msg: null };
-  }
+class App extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { loading: true, event: null, image: null };
+    }
 
-  handleClick = e => {
-    e.preventDefault();
+    chooseImage = (images) => {
+        if (images.length === 0) return null;
+        const fullWidth = window.innerWidth;
+        const filteredImages = images.filter((image) => image.width < fullWidth);
+        const imagesToSort = filteredImages.length > 0 ? filteredImages : images;
+        const sortedImages = imagesToSort.sort((imageA, imageB) => imageB.width - imageA.width);
+        return sortedImages[0].url;
+    };
 
-    this.setState({ loading: true });
-    fetch('/.netlify/functions/hello')
-      .then(response => response.json())
-      .then(json => this.setState({ loading: false, msg: json.msg }));
-  };
+    componentDidMount = async () => {
+        const response = await fetch("/.netlify/functions/getEvents");
+        const event = await response.json();
+        const image = this.chooseImage(event.images);
+        this.setState({ loading: false, event, image });
+    };
 
-  render() {
-    const { loading, msg } = this.state;
+    getTimePhrase = () => {
+        if (!this.state.event.dates.start)
+            return `There's nothing on at the Hydro tonight (${format(new Date(), "dddd Do MMMM YYYY")})`;
+        const date = this.state.event.dates.start.localDate;
+        const time = this.state.event.dates.start.localTime;
+        const localDateTime = `${date}T${time}`;
+        const startInPast = isPast(localDateTime);
+        const startDateIsToday = isToday(date);
+        const formattedDate = format(date, "dddd Do MMMM YYYY");
+        return `${startInPast ? "Started" : "Starts"} ${
+            startDateIsToday ? `today (${formattedDate})` : formattedDate
+        } at ${format(localDateTime, "h:mma")}`;
+    };
 
-    return (
-      <p>
-        <button onClick={this.handleClick}>
-          {loading ? 'Loading...' : 'Call Lambda'}
-        </button>
-        <br />
-        <span>{msg}</span>
-      </p>
-    );
-  }
-}
-
-class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <LambdaDemo />
-        </header>
-      </div>
-    );
-  }
+    render() {
+        return (
+            <div className="App">
+                {this.state.event ? (
+                    <>
+                        {this.state.event.images.length > 0 && (
+                            <img src={this.state.image} className="event-image" alt="Event promo" />
+                        )}
+                        <h1 className="event-title">{this.state.event.name}</h1>
+                        <p>{this.getTimePhrase()}</p>
+                        {this.state.event.dates.status && this.state.event.dates.status.code === "onsale" && (
+                            <p>
+                                <a href={this.state.event.url} target="_blank" rel="noopener noreferrer">
+                                    Look for tickets
+                                </a>
+                            </p>
+                        )}
+                    </>
+                ) : (
+                    <h1>Loading...</h1>
+                )}
+            </div>
+        );
+    }
 }
 
 export default App;

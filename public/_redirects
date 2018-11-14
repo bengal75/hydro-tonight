@@ -1,0 +1,2 @@
+# Redirect default Netlify subdomain to primary domain
+https://hydro-tonight.netlify.com/* https://whatsonatthehydrotonight.com/:splat 301!

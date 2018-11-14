@@ -28,16 +28,24 @@ class App extends React.Component {
 
     getTimePhrase = () => {
         if (!this.state.event.dates.start)
-            return `There's nothing on at the Hydro tonight (${format(new Date(), "dddd Do MMMM YYYY")})`;
+            return (
+                <p>
+                    There's nothing on at the Hydro tonight
+                    <br />({format(new Date(), "dddd Do MMMM YYYY")})
+                </p>
+            );
         const date = this.state.event.dates.start.localDate;
         const time = this.state.event.dates.start.localTime;
         const localDateTime = `${date}T${time}`;
         const startInPast = isPast(localDateTime);
         const startDateIsToday = isToday(date);
         const formattedDate = format(date, "dddd Do MMMM YYYY");
-        return `${startInPast ? "Started" : "Starts"} ${
-            startDateIsToday ? `today (${formattedDate})` : formattedDate
-        } at ${format(localDateTime, "h:mma")}`;
+        return (
+            <p>
+                {startInPast ? "Started" : "Starts"} {startDateIsToday ? `today (${formattedDate})` : formattedDate} at{" "}
+                {format(localDateTime, "h:mma")}
+            </p>
+        );
     };
 
     render() {
@@ -49,7 +57,7 @@ class App extends React.Component {
                             <img src={this.state.image} className="event-image" alt="Event promo" />
                         )}
                         <h1 className="event-title">{this.state.event.name}</h1>
-                        <p>{this.getTimePhrase()}</p>
+                        {this.getTimePhrase()}
                         {this.state.event.dates.status && this.state.event.dates.status.code === "onsale" && (
                             <p>
                                 <a href={this.state.event.url} target="_blank" rel="noopener noreferrer">

@@ -20,7 +20,7 @@ class App extends React.Component {
     };
 
     componentDidMount = async () => {
-        const response = await fetch("/.netlify/functions/getEvents");
+        const response = await fetch("/_/functions/getEvents");
         const event = await response.json();
         const image = this.chooseImage(event.images);
         this.setState({ loading: false, event, image });

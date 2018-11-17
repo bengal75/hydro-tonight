@@ -20,10 +20,20 @@ class App extends React.Component {
     };
 
     componentDidMount = async () => {
-        const response = await fetch("/_/functions/getEvents");
-        const event = await response.json();
-        const image = this.chooseImage(event.images);
-        this.setState({ loading: false, event, image });
+        try {
+            const response = await fetch("/_/functions/getEvents");
+            const event = await response.json();
+            const image = this.chooseImage(event.images);
+            this.setState({ loading: false, event, image });
+        } catch (err) {
+            console.log(err);
+            this.setState({ loading: false, event: false });
+        }
+    };
+
+    retry = () => {
+        this.setState({ loading: true, event: null, image: null });
+        this.componentDidMount();
     };
 
     getTimePhrase = () => {
@@ -51,7 +61,9 @@ class App extends React.Component {
     render() {
         return (
             <div className="App">
-                {this.state.event ? (
+                {this.state.loading ? (
+                    <h1>Checking...</h1>
+                ) : this.state.event ? (
                     <>
                         {this.state.event.images.length > 0 && (
                             <img src={this.state.image} className="event-image" alt="Event promo" />
@@ -67,7 +79,13 @@ class App extends React.Component {
                         )}
                     </>
                 ) : (
-                    <h1>Checking...</h1>
+                    <>
+                        <h1>Dunno</h1>
+                        <p>Couldn't find out what's on at the Hydro tonight. Maybe you're offline?</p>
+                        <p className="try-again" onClick={this.retry}>
+                            Try again
+                        </p>
+                    </>
                 )}
             </div>
         );

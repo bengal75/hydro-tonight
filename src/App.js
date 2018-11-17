@@ -67,7 +67,7 @@ class App extends React.Component {
                         )}
                     </>
                 ) : (
-                    <h1>Loading...</h1>
+                    <h1>Checking...</h1>
                 )}
             </div>
         );

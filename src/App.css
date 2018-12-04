@@ -24,7 +24,7 @@ body {
 
 .event-title {
     text-transform: uppercase;
-    font-size: calc(30px + 8vmin);
+    font-size: calc(25px + 7vmin);
 }
 
 .event-image {

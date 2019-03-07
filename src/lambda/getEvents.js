@@ -25,7 +25,13 @@ export const handler = async (event) => {
             body: JSON.stringify(emptyEvent, null, 2),
         };
 
-    const singleEvent = events._embedded.events[0];
+    const filteredEvents = events._embedded.events.filter(event => {
+        // Don't use 'events' that are just listings of premium tickets
+        // using a rather crude metric on the name. It works though!
+        if (event.name.includes("- Platinum") || event.name.includes("- VIP")) return false;
+        return true;
+    });
+    const singleEvent = filteredEvents.length ? filteredEvents[0] : events._embedded.events[0];
     const returnValue = {
         name: singleEvent.name,
         url: singleEvent.url,
